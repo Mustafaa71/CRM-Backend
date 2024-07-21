@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -44,6 +45,17 @@ var database = map[int]Customer{
 		Phone:     "da",
 		Contacted: false,
 	},
+}
+
+func inedx(w http.ResponseWriter, r *http.Request) {
+	content, err := os.ReadFile("USE.md")
+	if err != nil {
+		http.Error(w, "Could not read README.md file", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write(content)
 }
 
 // Retrive all customers from DB
@@ -155,6 +167,7 @@ func deleteCustomer(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter()
 
+	router.HandleFunc("/", inedx).Methods("GET")
 	router.HandleFunc("/customers", getCustomers).Methods("GET")
 	router.HandleFunc("/customers/{id}", getCustomer).Methods("GET")
 	router.HandleFunc("/customers", addCustomer).Methods("POST")
